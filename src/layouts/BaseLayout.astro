@@ -1,0 +1,345 @@
+---
+/**
+ * BaseLayout.astro
+ * Shared shell for all AppWow pages
+ * Header, footer nav and global styles live here
+ * No data fetching in this layout — pages handle their own data
+ */
+
+import type { MeResponse } from '../lib/api';
+
+interface Props {
+  title?: string;
+  description?: string;
+  me?: MeResponse;
+}
+
+const {
+  title = 'AppWow — Instant Apps Marketplace',
+  description = 'Discover and deploy verified Instant Applications globally.',
+  me,
+} = Astro.props;
+
+const isSignedIn = me?.authenticated === true;
+const tier = me?.member?.membership_tier ?? null;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content={description} />
+  <meta name="theme-color" content="#0057B8" />
+  <title>{title}</title>
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@400;500;600&display=swap"
+    rel="stylesheet"
+  />
+  <style is:global>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --vtl-blue:    #0057B8;
+      --vtl-cyan:    #00C8E8;
+      --evo-black:   #0A0A0A;
+      --evo-dark:    #111827;
+      --tech-grey:   #4A4A4A;
+      --light-grey:  #F2F2F2;
+      --mid-grey:    #9CA3AF;
+      --success:     #28A745;
+      --amber:       #FFC107;
+      --font-display: 'Syne', sans-serif;
+      --font-body:    'DM Sans', sans-serif;
+      --radius:       14px;
+      --radius-icon:  12px;
+      --shadow:       0 2px 12px rgba(0,0,0,.08);
+      --hover-shadow: 0 8px 28px rgba(0,87,184,.15);
+      --transition:   all .25s cubic-bezier(.4,0,.2,1);
+    }
+
+    body {
+      font-family: var(--font-body);
+      background: #ffffff;
+      color: var(--evo-black);
+      -webkit-font-smoothing: antialiased;
+      display: flex;
+      flex-direction: column;
+      min-height: 100dvh;
+    }
+
+    main {
+      flex: 1;
+    }
+
+    a { color: inherit; }
+    button { font-family: var(--font-body); }
+  </style>
+</head>
+<body>
+
+  <!-- ── HEADER ── -->
+  <header class="site-header">
+    <div class="header-inner">
+
+      <!-- Logo -->
+      <a href="/" class="logo" aria-label="AppWow home">
+        <div class="logo-mark">A</div>
+        <span class="logo-text">App<span>Wow</span></span>
+      </a>
+
+      <!-- Hamburger -->
+      <button class="menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ── MENU OVERLAY ── -->
+  <div class="menu-backdrop" id="menuBackdrop" aria-hidden="true"></div>
+  <nav class="menu-panel" id="menuPanel" aria-label="Site navigation">
+    <div class="menu-top">
+      <a href="/" class="logo logo--dark">
+        <div class="logo-mark">A</div>
+        <span class="logo-text">App<span>Wow</span></span>
+      </a>
+      <button class="menu-close" id="menuClose" aria-label="Close menu">✕</button>
+    </div>
+    <div class="menu-links">
+      <a href="/developer" class="menu-link"><span class="menu-link-icon">⚙️</span> Developer</a>
+      <a href="/account"   class="menu-link"><span class="menu-link-icon">👤</span> Account</a>
+      <a href="/about"     class="menu-link"><span class="menu-link-icon">ℹ️</span> About</a>
+      <a href="/link3"     class="menu-link"><span class="menu-link-icon">🔗</span> LINK3 Sales Process</a>
+    </div>
+    <div class="menu-account">
+      {isSignedIn ? (
+        <div class="menu-user">
+          <div class="menu-avatar">{me?.member?.email?.charAt(0).toUpperCase()}</div>
+          <div>
+            <div class="menu-email">{me?.member?.email}</div>
+            {tier && <div class="menu-tier">{tier}</div>}
+          </div>
+        </div>
+      ) : (
+        <a href="/account" class="menu-signin">Sign In</a>
+      )}
+    </div>
+  </nav>
+
+  <!-- ── PAGE CONTENT ── -->
+  <main>
+    <slot />
+  </main>
+
+  <!-- ── FOOTER NAV ── -->
+  <nav class="footer-nav" aria-label="Footer navigation">
+    <div class="footer-nav-inner">
+      <a href="/"           class="footer-btn" id="footerHome">Home</a>
+      <a href="/categories" class="footer-btn" id="footerCats">Categories</a>
+      <button               class="footer-btn" id="footerSearch" aria-label="Search">Search</button>
+    </div>
+  </nav>
+
+</body>
+</html>
+
+<style>
+  /* ── HEADER ── */
+  .site-header {
+    background: var(--evo-black);
+    padding: .875rem 1.5rem;
+    position: sticky;
+    top: 0;
+    z-index: 200;
+  }
+  .header-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  /* ── LOGO ── */
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: .625rem;
+    text-decoration: none;
+    color: white;
+  }
+  .logo-mark {
+    width: 38px; height: 38px;
+    background: linear-gradient(135deg, var(--vtl-blue) 0%, var(--vtl-cyan) 60%, #28A745 100%);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-display);
+    font-weight: 800; font-size: 1.3rem; color: white;
+  }
+  .logo-text {
+    font-family: var(--font-display);
+    font-size: 1.35rem; font-weight: 700; letter-spacing: -.02em;
+  }
+  .logo-text span { color: var(--vtl-cyan); }
+
+  /* ── HAMBURGER ── */
+  .menu-btn {
+    display: flex; flex-direction: column;
+    gap: 5px; padding: 6px;
+    background: none; border: none; cursor: pointer;
+  }
+  .menu-btn span {
+    display: block; width: 22px; height: 2px;
+    background: white; border-radius: 2px;
+    transition: var(--transition);
+  }
+
+  /* ── MENU OVERLAY ── */
+  .menu-backdrop {
+    display: none; position: fixed;
+    inset: 0; background: rgba(0,0,0,.5);
+    z-index: 300;
+  }
+  .menu-backdrop.open { display: block; }
+  .menu-panel {
+    position: fixed; top: 0; left: 0;
+    width: min(320px, 85vw); height: 100dvh;
+    background: var(--evo-dark);
+    z-index: 400;
+    display: flex; flex-direction: column;
+    transform: translateX(-100%);
+    transition: transform .3s cubic-bezier(.4,0,.2,1);
+  }
+  .menu-panel.open { transform: translateX(0); }
+  .menu-top {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: .875rem 1.25rem;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+  }
+  .menu-close {
+    background: rgba(255,255,255,.08); border: none;
+    color: white; width: 32px; height: 32px;
+    border-radius: 8px; cursor: pointer;
+    font-size: 1rem; transition: var(--transition);
+  }
+  .menu-close:hover { background: rgba(255,255,255,.16); }
+  .menu-links { padding: 1rem 0; flex: 1; }
+  .menu-link {
+    display: flex; align-items: center; gap: .875rem;
+    padding: .875rem 1.25rem;
+    color: rgba(255,255,255,.8);
+    text-decoration: none; font-weight: 500; font-size: .95rem;
+    border-left: 3px solid transparent;
+    transition: var(--transition);
+  }
+  .menu-link:hover {
+    background: rgba(255,255,255,.06);
+    color: white;
+    border-left-color: var(--vtl-cyan);
+  }
+  .menu-link-icon { font-size: 1.1rem; width: 20px; text-align: center; }
+  .menu-account {
+    padding: 1rem 1.25rem 1.5rem;
+    border-top: 1px solid rgba(255,255,255,.08);
+  }
+  .menu-signin {
+    display: block; width: 100%;
+    padding: .75rem; background: var(--vtl-blue);
+    color: white; text-decoration: none;
+    border-radius: 10px; font-weight: 600;
+    font-size: .9rem; text-align: center;
+    transition: var(--transition);
+  }
+  .menu-signin:hover { background: #0068d9; }
+  .menu-user { display: flex; gap: .75rem; align-items: center; }
+  .menu-avatar {
+    width: 38px; height: 38px;
+    background: linear-gradient(135deg, var(--vtl-blue), var(--vtl-cyan));
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; color: white; font-size: .95rem;
+    flex-shrink: 0;
+  }
+  .menu-email { font-size: .8rem; color: white; }
+  .menu-tier {
+    font-size: .7rem; color: var(--vtl-cyan);
+    font-weight: 600; text-transform: uppercase; letter-spacing: .04em;
+  }
+
+  /* ── FOOTER NAV ── */
+  .footer-nav {
+    position: sticky; bottom: 0;
+    background: rgba(255,255,255,.97);
+    backdrop-filter: blur(16px);
+    border-top: 1px solid #E5E7EB;
+    padding: .75rem 1.25rem;
+    z-index: 100;
+    box-shadow: 0 -4px 20px rgba(0,0,0,.08);
+  }
+  .footer-nav-inner {
+    max-width: 600px; margin: 0 auto;
+    display: flex; gap: .75rem;
+  }
+  .footer-btn {
+    flex: 1;
+    display: flex; align-items: center; justify-content: center;
+    padding: .75rem 1rem;
+    background: white;
+    border: 1.5px solid #E5E7EB;
+    border-radius: 12px;
+    color: var(--tech-grey);
+    text-decoration: none;
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: 0 2px 8px rgba(0,0,0,.06);
+    font-family: var(--font-display);
+    font-weight: 700; font-size: .8rem;
+    letter-spacing: .01em;
+    white-space: nowrap;
+  }
+  .footer-btn:hover,
+  .footer-btn.active {
+    border-color: var(--vtl-blue);
+    color: var(--vtl-blue);
+    box-shadow: 0 4px 14px rgba(0,87,184,.12);
+  }
+</style>
+
+<script>
+  // ── MENU TOGGLE ──
+  const menuBtn      = document.getElementById('menuBtn');
+  const menuPanel    = document.getElementById('menuPanel');
+  const menuBackdrop = document.getElementById('menuBackdrop');
+  const menuClose    = document.getElementById('menuClose');
+
+  function openMenu() {
+    menuPanel?.classList.add('open');
+    menuBackdrop?.classList.add('open');
+    menuBtn?.setAttribute('aria-expanded', 'true');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeMenu() {
+    menuPanel?.classList.remove('open');
+    menuBackdrop?.classList.remove('open');
+    menuBtn?.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+  }
+
+  menuBtn?.addEventListener('click', openMenu);
+  menuClose?.addEventListener('click', closeMenu);
+  menuBackdrop?.addEventListener('click', closeMenu);
+
+  // ── FOOTER ACTIVE STATE ──
+  const path = window.location.pathname;
+  if (path === '/' || path === '/index.html') {
+    document.getElementById('footerHome')?.classList.add('active');
+  } else if (path.startsWith('/categories')) {
+    document.getElementById('footerCats')?.classList.add('active');
+  }
+
+  // Search button — dispatches event that index page listens to
+  document.getElementById('footerSearch')?.addEventListener('click', () => {
+    window.dispatchEvent(new CustomEvent('appwow:search-toggle'));
+  });
+</script>
