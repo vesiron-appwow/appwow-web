@@ -1,0 +1,131 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getMe } from '../lib/api';
+
+let me = {
+  authenticated: false,
+  member: null,
+  entitlements: {
+    link3_stage1: false, link3_stage2: false, link3_stage3: false,
+    linxmart_view: false, full_evosystem: false,
+  },
+  _phase: 1,
+};
+
+try {
+  me = await getMe();
+} catch (err) {
+  console.error('[AppWow] Developer page fetch failed:', err);
+}
+---
+
+<BaseLayout title="Developer Hub — AppWow" me={me}>
+
+  <section class="page-header">
+    <div class="page-header-inner">
+      <a href="/" class="back-btn">← AppWow</a>
+      <h1 class="page-title">Developer Hub</h1>
+      <p class="page-sub">Submit and manage your Instant Applications</p>
+    </div>
+  </section>
+
+  <section class="content-section" id="submit">
+    <div class="content-inner">
+      <h2 class="section-title">Submit Your App</h2>
+      <p class="section-body">List your Instant Application on AppWow's verified marketplace. All submissions go through an automated security scan before going live.</p>
+      <a href="mailto:developer@vtl-evosystem.com" class="btn-primary">Start Submission</a>
+    </div>
+  </section>
+
+  <section class="content-section content-section--grey" id="requirements">
+    <div class="content-inner">
+      <h2 class="section-title">Requirements</h2>
+      <p class="section-body">Your app must meet the following to pass verification:</p>
+      <ul class="req-list">
+        <li>Served over HTTPS</li>
+        <li>Valid web app manifest (manifest.json)</li>
+        <li>Responsive — works on mobile and desktop</li>
+        <li>No malicious scripts or trackers</li>
+        <li>Functional at the submitted URL</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="content-section" id="docs">
+    <div class="content-inner">
+      <h2 class="section-title">Documentation</h2>
+      <p class="section-body">Full developer documentation including the manifest specification, verification process and API access is being prepared. Check back shortly.</p>
+    </div>
+  </section>
+
+  <section class="content-section content-section--grey" id="api">
+    <div class="content-inner">
+      <h2 class="section-title">API Access</h2>
+      <p class="section-body">Evosystem data feeds and developer API access will be available to verified developers. Register your interest below.</p>
+      <a href="mailto:developer@vtl-evosystem.com" class="btn-ghost">Register Interest</a>
+    </div>
+  </section>
+
+</BaseLayout>
+
+<style>
+  .page-header {
+    background: var(--evo-dark);
+    padding: 2rem 1.5rem;
+    border-bottom: 1px solid rgba(255,255,255,.06);
+  }
+  .page-header-inner { max-width: 860px; margin: 0 auto; }
+  .back-btn {
+    color: rgba(255,255,255,.5); text-decoration: none;
+    font-size: .85rem; font-weight: 600;
+    display: inline-block; margin-bottom: 1rem;
+    transition: var(--transition);
+  }
+  .back-btn:hover { color: white; }
+  .page-title {
+    font-family: var(--font-display);
+    font-size: 2rem; font-weight: 800; color: white; margin-bottom: .4rem;
+  }
+  .page-sub { color: rgba(255,255,255,.5); font-size: .9rem; }
+
+  .content-section { padding: 2.5rem 1.5rem; border-bottom: 1px solid #F3F4F6; }
+  .content-section--grey { background: #F9FAFB; }
+  .content-inner { max-width: 860px; margin: 0 auto; }
+  .section-title {
+    font-family: var(--font-display);
+    font-size: 1.35rem; font-weight: 700;
+    color: var(--evo-black); margin-bottom: .875rem;
+  }
+  .section-body {
+    color: var(--tech-grey); font-size: .95rem;
+    line-height: 1.7; margin-bottom: 1.5rem; max-width: 580px;
+  }
+
+  .req-list {
+    list-style: none; display: flex; flex-direction: column; gap: .625rem;
+    max-width: 480px;
+  }
+  .req-list li {
+    display: flex; align-items: center; gap: .75rem;
+    font-size: .9rem; color: var(--tech-grey);
+  }
+  .req-list li::before {
+    content: '✓';
+    color: var(--success); font-weight: 700; flex-shrink: 0;
+  }
+
+  .btn-primary {
+    display: inline-flex; padding: .8rem 1.75rem;
+    background: var(--vtl-blue); color: white;
+    text-decoration: none; border-radius: 12px;
+    font-weight: 700; font-size: .9rem; transition: var(--transition);
+  }
+  .btn-primary:hover { background: #0068d9; }
+  .btn-ghost {
+    display: inline-flex; padding: .8rem 1.75rem;
+    border: 1.5px solid var(--vtl-blue); color: var(--vtl-blue);
+    text-decoration: none; border-radius: 12px;
+    font-weight: 600; font-size: .9rem; transition: var(--transition);
+  }
+  .btn-ghost:hover { background: var(--vtl-blue); color: white; }
+</style>

@@ -1,0 +1,177 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getMe } from '../lib/api';
+
+let me = {
+  authenticated: false,
+  member: null,
+  entitlements: {
+    link3_stage1: false, link3_stage2: false, link3_stage3: false,
+    linxmart_view: false, full_evosystem: false,
+  },
+  _phase: 1,
+};
+
+try {
+  me = await getMe();
+} catch (err) {
+  console.error('[AppWow] Account page fetch failed:', err);
+}
+
+const isSignedIn = me.authenticated === true;
+const tier = me.member?.membership_tier ?? null;
+const status = me.member?.membership_status ?? null;
+---
+
+<BaseLayout title="Account — AppWow" me={me}>
+
+  <section class="page-header">
+    <div class="page-header-inner">
+      <a href="/" class="back-btn">← AppWow</a>
+      <h1 class="page-title">Account</h1>
+    </div>
+  </section>
+
+  {!isSignedIn && (
+    <section class="content-section">
+      <div class="content-inner">
+        <div class="sign-in-state">
+          <div class="sign-in-icon">👤</div>
+          <h2>Sign in to your account</h2>
+          <p>Access your myLynx membership, entitlements and evosystem products.</p>
+          <p class="phase-note">Authentication is coming in Phase 2. Check back shortly.</p>
+        </div>
+      </div>
+    </section>
+  )}
+
+  {isSignedIn && (
+    <section class="content-section">
+      <div class="content-inner">
+
+        <div class="member-card">
+          <div class="member-avatar">
+            {me.member!.email.charAt(0).toUpperCase()}
+          </div>
+          <div class="member-info">
+            <div class="member-email">{me.member!.email}</div>
+            <div class="member-tier">{tier}</div>
+            <div class={`member-status member-status--${status}`}>{status}</div>
+          </div>
+        </div>
+
+        <h2 class="section-title">Your Entitlements</h2>
+        <div class="entitlement-list">
+          <div class={`entitlement-row ${me.entitlements.full_evosystem ? 'on' : 'off'}`}>
+            <span>Full Evosystem Access</span>
+            <span class="entitlement-badge">{me.entitlements.full_evosystem ? 'Active' : 'Not included'}</span>
+          </div>
+          <div class={`entitlement-row ${me.entitlements.linxmart_view ? 'on' : 'off'}`}>
+            <span>LinxMart Access</span>
+            <span class="entitlement-badge">{me.entitlements.linxmart_view ? 'Active' : 'Not included'}</span>
+          </div>
+          <div class={`entitlement-row ${me.entitlements.link3_stage3 ? 'on' : 'off'}`}>
+            <span>LINK3 Stage 3</span>
+            <span class="entitlement-badge">{me.entitlements.link3_stage3 ? 'Active' : 'Not included'}</span>
+          </div>
+          <div class={`entitlement-row ${me.entitlements.link3_stage2 ? 'on' : 'off'}`}>
+            <span>LINK3 Stage 2</span>
+            <span class="entitlement-badge">{me.entitlements.link3_stage2 ? 'Active' : 'Not included'}</span>
+          </div>
+          <div class={`entitlement-row ${me.entitlements.link3_stage1 ? 'on' : 'off'}`}>
+            <span>LINK3 Stage 1</span>
+            <span class="entitlement-badge">{me.entitlements.link3_stage1 ? 'Active' : 'Not included'}</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  )}
+
+</BaseLayout>
+
+<style>
+  .page-header {
+    background: var(--evo-dark);
+    padding: 2rem 1.5rem;
+    border-bottom: 1px solid rgba(255,255,255,.06);
+  }
+  .page-header-inner { max-width: 860px; margin: 0 auto; }
+  .back-btn {
+    color: rgba(255,255,255,.5); text-decoration: none;
+    font-size: .85rem; font-weight: 600;
+    display: inline-block; margin-bottom: 1rem;
+    transition: var(--transition);
+  }
+  .back-btn:hover { color: white; }
+  .page-title {
+    font-family: var(--font-display);
+    font-size: 2rem; font-weight: 800; color: white;
+  }
+
+  .content-section { padding: 2.5rem 1.5rem; }
+  .content-inner { max-width: 600px; margin: 0 auto; }
+
+  .sign-in-state { text-align: center; padding: 3rem 0; }
+  .sign-in-icon { font-size: 3rem; margin-bottom: 1.25rem; }
+  .sign-in-state h2 {
+    font-family: var(--font-display); font-size: 1.5rem;
+    font-weight: 700; margin-bottom: .75rem; color: var(--evo-black);
+  }
+  .sign-in-state p { color: var(--tech-grey); line-height: 1.6; margin-bottom: .5rem; }
+  .phase-note {
+    font-size: .82rem; color: var(--mid-grey);
+    margin-top: 1rem; font-style: italic;
+  }
+
+  .member-card {
+    display: flex; align-items: center; gap: 1.25rem;
+    background: var(--evo-dark); border-radius: 16px;
+    padding: 1.5rem; margin-bottom: 2rem;
+  }
+  .member-avatar {
+    width: 56px; height: 56px; flex-shrink: 0;
+    background: linear-gradient(135deg, var(--vtl-blue), var(--vtl-cyan));
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-display); font-size: 1.4rem;
+    font-weight: 800; color: white;
+  }
+  .member-email { color: white; font-weight: 600; font-size: .95rem; margin-bottom: .3rem; }
+  .member-tier {
+    color: var(--vtl-cyan); font-size: .75rem;
+    font-weight: 700; text-transform: uppercase; letter-spacing: .06em;
+    margin-bottom: .3rem;
+  }
+  .member-status {
+    font-size: .72rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .04em;
+  }
+  .member-status--active  { color: #5cb85c; }
+  .member-status--lapsed  { color: var(--amber); }
+  .member-status--cancelled { color: #dc3545; }
+
+  .section-title {
+    font-family: var(--font-display); font-size: 1.1rem;
+    font-weight: 700; color: var(--evo-black); margin-bottom: 1rem;
+  }
+  .entitlement-list { display: flex; flex-direction: column; gap: 0; }
+  .entitlement-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: .875rem 0; border-bottom: 1px solid #F3F4F6;
+    font-size: .9rem;
+  }
+  .entitlement-row:last-child { border-bottom: none; }
+  .entitlement-row.on  { color: var(--evo-black); }
+  .entitlement-row.off { color: var(--mid-grey); }
+  .entitlement-badge {
+    font-size: .72rem; font-weight: 700;
+    padding: .2rem .625rem; border-radius: 99px;
+  }
+  .on .entitlement-badge {
+    background: rgba(40,167,69,.1); color: #28a745;
+  }
+  .off .entitlement-badge {
+    background: var(--light-grey); color: var(--mid-grey);
+  }
+</style>

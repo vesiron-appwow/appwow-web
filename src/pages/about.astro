@@ -1,0 +1,145 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getMe } from '../lib/api';
+
+let me = {
+  authenticated: false,
+  member: null,
+  entitlements: {
+    link3_stage1: false, link3_stage2: false, link3_stage3: false,
+    linxmart_view: false, full_evosystem: false,
+  },
+  _phase: 1,
+};
+
+try {
+  me = await getMe();
+} catch (err) {
+  console.error('[AppWow] About page fetch failed:', err);
+}
+---
+
+<BaseLayout title="About — AppWow" me={me}>
+
+  <section class="page-header">
+    <div class="page-header-inner">
+      <a href="/" class="back-btn">← AppWow</a>
+      <h1 class="page-title">About AppWow</h1>
+      <p class="page-sub">Part of the VTL Evosystem</p>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <div class="content-inner">
+      <h2 class="section-title">What is AppWow?</h2>
+      <p class="section-body">AppWow is the Instant Applications marketplace within the VTL Evosystem. It allows anyone to discover, browse and launch verified web applications from a single trusted location — without downloads, without app stores, and without friction.</p>
+    </div>
+  </section>
+
+  <section class="content-section content-section--grey">
+    <div class="content-inner">
+      <h2 class="section-title">What is an Instant Application?</h2>
+      <p class="section-body">An Instant Application is a web app that runs directly in your browser. No installation required. You tap, it loads, you use it. AppWow verifies each one for security before it is listed.</p>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <div class="content-inner">
+      <h2 class="section-title">The VTL Evosystem</h2>
+      <p class="section-body">AppWow is one product within a broader platform called the VTL Evosystem — a connected suite of discovery, trade and social products built to serve consumers, businesses and developers through a single shared infrastructure.</p>
+      <div class="product-grid">
+        <div class="product-card">
+          <span class="product-icon">📍</span>
+          <div class="product-name">LinxLocal</div>
+          <div class="product-desc">Local business discovery</div>
+        </div>
+        <div class="product-card">
+          <span class="product-icon">🚗</span>
+          <div class="product-name">CarLinx</div>
+          <div class="product-desc">Vehicle marketplace</div>
+        </div>
+        <div class="product-card">
+          <span class="product-icon">🛒</span>
+          <div class="product-name">LinxMart</div>
+          <div class="product-desc">Curated offers</div>
+        </div>
+        <div class="product-card">
+          <span class="product-icon">🏠</span>
+          <div class="product-name">HomeLinx</div>
+          <div class="product-desc">Property listings</div>
+        </div>
+        <div class="product-card">
+          <span class="product-icon">🎮</span>
+          <div class="product-name">Arcadia</div>
+          <div class="product-desc">Gaming and entertainment</div>
+        </div>
+        <div class="product-card">
+          <span class="product-icon">⚡</span>
+          <div class="product-name">myLynx</div>
+          <div class="product-desc">Your personal vault</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="content-section content-section--grey">
+    <div class="content-inner">
+      <h2 class="section-title">Contact</h2>
+      <p class="section-body">For general enquiries, partnerships or press contact us at <a href="mailto:hello@vtl-evosystem.com" class="inline-link">hello@vtl-evosystem.com</a></p>
+    </div>
+  </section>
+
+</BaseLayout>
+
+<style>
+  .page-header {
+    background: var(--evo-dark);
+    padding: 2rem 1.5rem;
+    border-bottom: 1px solid rgba(255,255,255,.06);
+  }
+  .page-header-inner { max-width: 860px; margin: 0 auto; }
+  .back-btn {
+    color: rgba(255,255,255,.5); text-decoration: none;
+    font-size: .85rem; font-weight: 600;
+    display: inline-block; margin-bottom: 1rem;
+    transition: var(--transition);
+  }
+  .back-btn:hover { color: white; }
+  .page-title {
+    font-family: var(--font-display);
+    font-size: 2rem; font-weight: 800; color: white; margin-bottom: .4rem;
+  }
+  .page-sub { color: rgba(255,255,255,.5); font-size: .9rem; }
+
+  .content-section { padding: 2.5rem 1.5rem; border-bottom: 1px solid #F3F4F6; }
+  .content-section--grey { background: #F9FAFB; }
+  .content-inner { max-width: 860px; margin: 0 auto; }
+  .section-title {
+    font-family: var(--font-display);
+    font-size: 1.35rem; font-weight: 700;
+    color: var(--evo-black); margin-bottom: .875rem;
+  }
+  .section-body {
+    color: var(--tech-grey); font-size: .95rem;
+    line-height: 1.7; max-width: 620px;
+  }
+  .inline-link { color: var(--vtl-blue); text-decoration: none; font-weight: 600; }
+  .inline-link:hover { text-decoration: underline; }
+
+  .product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 1rem; margin-top: 1.5rem;
+  }
+  .product-card {
+    background: white; border: 1.5px solid #E5E7EB;
+    border-radius: 14px; padding: 1.25rem 1rem;
+    text-align: center;
+  }
+  .product-icon { font-size: 1.75rem; display: block; margin-bottom: .625rem; }
+  .product-name {
+    font-family: var(--font-display); font-size: .9rem;
+    font-weight: 700; color: var(--evo-black); margin-bottom: .25rem;
+  }
+  .product-desc { font-size: .75rem; color: var(--mid-grey); }
+</style>

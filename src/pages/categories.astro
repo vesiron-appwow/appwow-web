@@ -1,0 +1,184 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCatalogApps, getMe } from '../lib/api';
+
+let catalog = { apps: [], count: 0, source: 'd1' };
+let me = {
+  authenticated: false,
+  member: null,
+  entitlements: {
+    link3_stage1: false, link3_stage2: false, link3_stage3: false,
+    linxmart_view: false, full_evosystem: false,
+  },
+  _phase: 1,
+};
+
+try {
+  [catalog, me] = await Promise.all([getCatalogApps(), getMe()]);
+} catch (err) {
+  console.error('[AppWow] Categories fetch failed:', err);
+}
+
+const categoryMap = new Map();
+for (const app of catalog.apps) {
+  if (!categoryMap.has(app.category)) categoryMap.set(app.category, []);
+  categoryMap.get(app.category).push(app);
+}
+const categories = Array.from(categoryMap.entries()).sort((a, b) => a[0].localeCompare(b[0]));
+const isEmpty = categories.length === 0;
+---
+
+<BaseLayout title="Categories — AppWow" me={me}>
+
+  <section class="page-header">
+    <div class="page-header-inner">
+      <a href="/" class="back-btn">← AppWow</a>
+      <h1 class="page-title">Categories</h1>
+      <p class="page-sub">Browse apps by category</p>
+    </div>
+  </section>
+
+  {isEmpty && (
+    <section class="empty-state">
+      <div class="empty-inner">
+        <div class="empty-icon">📂</div>
+        <h2>No categories yet</h2>
+        <p>Apps are being added to the catalogue. Check back shortly.</p>
+        <a href="/" class="btn-primary">Back to Home</a>
+      </div>
+    </section>
+  )}
+
+  {categories.map(([category, apps]) => (
+    <section class="category-section">
+      <div class="category-inner">
+        <div class="category-header">
+          <h2 class="category-name">{category}</h2>
+          <span class="category-count">{apps.length}</span>
+        </div>
+        <div class="apps-grid">
+          {apps.map(app => (
+            <a href={`/app/${app.id}`} class="app-card">
+              <div class="app-icon-wrap">
+                {app.icon_r2_key
+                  ? <img src={`/media/${app.icon_r2_key}`} alt={app.app_name} width="56" height="56" />
+                  : <div class="app-icon-placeholder">{app.app_name.charAt(0)}</div>
+                }
+                {app.is_evosystem === 1 && <span class="badge-evo">✦</span>}
+              </div>
+              <div class="app-info">
+                <div class="app-name">{app.short_name ?? app.app_name}</div>
+                {app.short_description && (
+                  <div class="app-desc">{app.short_description}</div>
+                )}
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  ))}
+
+</BaseLayout>
+
+<style>
+  .page-header {
+    background: var(--evo-dark);
+    padding: 2rem 1.5rem;
+    border-bottom: 1px solid rgba(255,255,255,.06);
+  }
+  .page-header-inner { max-width: 1400px; margin: 0 auto; }
+  .back-btn {
+    color: rgba(255,255,255,.5); text-decoration: none;
+    font-size: .85rem; font-weight: 600;
+    display: inline-block; margin-bottom: 1rem;
+    transition: var(--transition);
+  }
+  .back-btn:hover { color: white; }
+  .page-title {
+    font-family: var(--font-display);
+    font-size: 2rem; font-weight: 800; color: white; margin-bottom: .4rem;
+  }
+  .page-sub { color: rgba(255,255,255,.5); font-size: .9rem; }
+
+  .empty-state { padding: 5rem 1.5rem; text-align: center; }
+  .empty-inner { max-width: 360px; margin: 0 auto; }
+  .empty-icon { font-size: 3rem; margin-bottom: 1.25rem; }
+  .empty-state h2 {
+    font-family: var(--font-display); font-size: 1.5rem;
+    font-weight: 700; margin-bottom: .625rem;
+  }
+  .empty-state p { color: var(--tech-grey); margin-bottom: 1.75rem; line-height: 1.6; }
+  .btn-primary {
+    display: inline-flex; padding: .75rem 1.5rem;
+    background: var(--vtl-blue); color: white;
+    text-decoration: none; border-radius: 12px;
+    font-weight: 700; font-size: .9rem; transition: var(--transition);
+  }
+  .btn-primary:hover { background: #0068d9; }
+
+  .category-section {
+    padding: 2rem 1.5rem;
+    border-bottom: 1px solid #F3F4F6;
+  }
+  .category-inner { max-width: 1400px; margin: 0 auto; }
+  .category-header {
+    display: flex; align-items: center; gap: .75rem; margin-bottom: 1.25rem;
+  }
+  .category-name {
+    font-family: var(--font-display);
+    font-size: 1.15rem; font-weight: 700;
+    color: var(--evo-black); text-transform: capitalize;
+  }
+  .category-count {
+    background: var(--light-grey); color: var(--tech-grey);
+    font-size: .72rem; font-weight: 700;
+    padding: .2rem .625rem; border-radius: 99px;
+  }
+  .apps-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+  .app-card {
+    display: flex; align-items: center; gap: .875rem;
+    background: white; border: 1.5px solid #E5E7EB;
+    border-radius: 14px; padding: 1rem;
+    text-decoration: none; color: inherit;
+    transition: var(--transition);
+    box-shadow: 0 2px 8px rgba(0,0,0,.05);
+  }
+  .app-card:hover {
+    border-color: var(--vtl-blue);
+    box-shadow: 0 4px 16px rgba(0,87,184,.12);
+    transform: translateY(-1px);
+  }
+  .app-icon-wrap { position: relative; flex-shrink: 0; }
+  .app-icon-wrap img { width: 56px; height: 56px; border-radius: 12px; object-fit: cover; }
+  .app-icon-placeholder {
+    width: 56px; height: 56px;
+    background: linear-gradient(135deg, var(--vtl-blue), var(--vtl-cyan));
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-display); font-size: 1.4rem; font-weight: 800; color: white;
+  }
+  .badge-evo {
+    position: absolute; bottom: -4px; right: -4px;
+    width: 18px; height: 18px;
+    background: linear-gradient(135deg, var(--vtl-blue), var(--vtl-cyan));
+    border-radius: 50%; border: 2px solid white;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .55rem; color: white;
+  }
+  .app-info { min-width: 0; }
+  .app-name {
+    font-family: var(--font-display); font-size: .88rem; font-weight: 700;
+    color: var(--evo-black);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .app-desc {
+    font-size: .75rem; color: var(--tech-grey); margin-top: .2rem;
+    display: -webkit-box; -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4;
+  }
+</style>

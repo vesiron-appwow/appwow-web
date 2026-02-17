@@ -1,0 +1,113 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getMe } from '../lib/api';
+
+let me = {
+  authenticated: false,
+  member: null,
+  entitlements: {
+    link3_stage1: false, link3_stage2: false, link3_stage3: false,
+    linxmart_view: false, full_evosystem: false,
+  },
+  _phase: 1,
+};
+
+try {
+  me = await getMe();
+} catch (err) {
+  console.error('[AppWow] Soon page fetch failed:', err);
+}
+
+const productNames: Record<string, string> = {
+  linxlocal: 'LinxLocal',
+  carlinx:   'CarLinx',
+  linxmart:  'LinxMart',
+  homelinx:  'HomeLinx',
+  arcadia:   'Arcadia',
+  mylynx:    'myLynx',
+};
+
+const productDescs: Record<string, string> = {
+  linxlocal: 'Local business discovery — find what is near you instantly.',
+  carlinx:   'The smarter way to buy, sell and discover vehicles.',
+  linxmart:  'Curated offers and deals from verified evosystem members.',
+  homelinx:  'Property listings — buy, sell and rent with confidence.',
+  arcadia:   'Gaming and entertainment — coming to the evosystem.',
+  mylynx:    'Your personal vault — store, manage and protect what matters.',
+};
+
+const key = Astro.url.searchParams.get('product') ?? '';
+const name = productNames[key] ?? 'This product';
+const desc = productDescs[key] ?? 'Something new is on its way.';
+---
+
+<BaseLayout title={`${name} — Coming Soon`} me={me}>
+
+  <section class="page-header">
+    <div class="page-header-inner">
+      <a href="/" class="back-btn">← AppWow</a>
+    </div>
+  </section>
+
+  <section class="soon-section">
+    <div class="soon-inner">
+      <div class="soon-icon">🚀</div>
+      <h1 class="soon-title">{name}</h1>
+      <p class="soon-desc">{desc}</p>
+      <div class="soon-badge">Coming Soon</div>
+      <a href="/" class="btn-primary">Back to AppWow</a>
+    </div>
+  </section>
+
+</BaseLayout>
+
+<style>
+  .page-header {
+    background: var(--evo-dark);
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid rgba(255,255,255,.06);
+  }
+  .page-header-inner { max-width: 860px; margin: 0 auto; }
+  .back-btn {
+    color: rgba(255,255,255,.5); text-decoration: none;
+    font-size: .85rem; font-weight: 600; transition: var(--transition);
+  }
+  .back-btn:hover { color: white; }
+
+  .soon-section {
+    min-height: 70dvh;
+    display: flex; align-items: center; justify-content: center;
+    padding: 3rem 1.5rem;
+    background: linear-gradient(160deg, var(--evo-black) 0%, #0D1B2A 100%);
+  }
+  .soon-inner { text-align: center; max-width: 480px; }
+  .soon-icon { font-size: 3.5rem; margin-bottom: 1.5rem; }
+  .soon-title {
+    font-family: var(--font-display);
+    font-size: 2.5rem; font-weight: 800;
+    color: white; margin-bottom: 1rem;
+  }
+  .soon-desc {
+    color: rgba(255,255,255,.6);
+    font-size: 1rem; line-height: 1.7;
+    margin-bottom: 1.75rem;
+  }
+  .soon-badge {
+    display: inline-block;
+    padding: .4rem 1rem;
+    background: rgba(0,200,232,.12);
+    border: 1px solid rgba(0,200,232,.3);
+    border-radius: 99px;
+    color: var(--vtl-cyan);
+    font-size: .75rem; font-weight: 700;
+    letter-spacing: .08em; text-transform: uppercase;
+    margin-bottom: 2rem;
+  }
+  .btn-primary {
+    display: inline-flex; padding: .8rem 1.75rem;
+    background: var(--vtl-blue); color: white;
+    text-decoration: none; border-radius: 12px;
+    font-weight: 700; font-size: .9rem; transition: var(--transition);
+  }
+  .btn-primary:hover { background: #0068d9; }
+</style>

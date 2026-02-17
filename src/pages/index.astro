@@ -1,0 +1,588 @@
+---
+/**
+ * src/pages/index.astro
+ * AppWow Homepage
+ * Contract: AppWow API Contract v1 — Section 2 (Homepage) + Section 4 (User State)
+ * Data source: VTL Platform API via src/lib/api.ts ONLY
+ */
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCatalogApps, getMe } from '../lib/api';
+import type { CatalogResponse, MeResponse } from '../lib/api';
+
+// ── DATA FETCH ──
+// Both calls run in parallel — no waterfall
+let catalog: CatalogResponse = { apps: [], count: 0, source: 'd1' };
+let me: MeResponse = {
+  authenticated: false,
+  member: null,
+  entitlements: {
+    link3_stage1: false,
+    link3_stage2: false,
+    link3_stage3: false,
+    linxmart_view: false,
+    full_evosystem: false,
+  },
+  _phase: 1,
+};
+
+try {
+  [catalog, me] = await Promise.all([
+    getCatalogApps(),
+    getMe(),
+  ]);
+} catch (err) {
+  // Graceful degradation — page renders with empty state
+  // Never throws to the user
+  console.error('[AppWow] Homepage data fetch failed:', err);
+}
+
+const featuredApps = catalog.apps.filter(a => a.is_featured === 1);
+const allApps      = catalog.apps;
+const isEmpty      = catalog.count === 0;
+---
+
+<BaseLayout
+  title="AppWow — Instant Apps Marketplace"
+  description="Discover and launch verified Instant Applications from across the web — all in one place."
+  me={me}
+>
+
+  <!-- ── UTILITY TOOLBAR ── -->
+  <section class="utility-bar" aria-label="VTL Evosystem products">
+    <div class="utility-inner">
+      <a href="/soon" data-product="linxlocal" class="utility-item">
+        <span class="utility-icon">📍</span>
+        <span>LinxLocal</span>
+      </a>
+      <a href="/soon" data-product="carlinx" class="utility-item">
+        <span class="utility-icon">🚗</span>
+        <span>CarLinx</span>
+      </a>
+      <a href="/soon" data-product="linxmart" class="utility-item">
+        <span class="utility-icon">🛒</span>
+        <span>LinxMart</span>
+      </a>
+      <a href="/soon" data-product="homelinx" class="utility-item">
+        <span class="utility-icon">🏠</span>
+        <span>HomeLinx</span>
+      </a>
+      <a href="/soon" data-product="arcadia" class="utility-item">
+        <span class="utility-icon">🎮</span>
+        <span>Arcadia</span>
+      </a>
+      <a href="/account" data-product="mylynx" class="utility-item utility-item--highlight">
+        <span class="utility-icon">⚡</span>
+        <span>myLynx</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- ── HERO ── -->
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="hero-badge">Instant Applications</div>
+      <h1 class="hero-title">
+        Every app.<br />
+        One place.<br />
+        <span class="hero-title-accent">Instantly.</span>
+      </h1>
+      <p class="hero-sub">
+        Discover and launch verified Instant Applications
+        from across the web — all in one place.
+      </p>
+      <div class="hero-actions">
+        <a href="/categories" class="btn-primary">Browse Categories</a>
+        <a href="/developer"  class="btn-ghost">Submit Your App</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── SEARCH BAR ── -->
+  <section class="search-section" id="searchSection" aria-label="Search">
+    <div class="search-inner">
+      <input
+        type="text"
+        id="searchInput"
+        class="search-input"
+        placeholder="Search apps, categories, developers..."
+        autocomplete="off"
+        aria-label="Search apps"
+      />
+      <button class="search-clear" id="searchClear" aria-label="Clear search">✕</button>
+    </div>
+  </section>
+
+  <!-- ── EMPTY STATE ── -->
+  {isEmpty && (
+    <section class="empty-state">
+      <div class="empty-inner">
+        <div class="empty-icon">🚀</div>
+        <h2>Catalogue launching soon</h2>
+        <p>We're onboarding verified Instant Applications right now. Check back shortly.</p>
+        <a href="/developer" class="btn-primary">Submit Your App</a>
+      </div>
+    </section>
+  )}
+
+  <!-- ── FEATURED APPS ── -->
+  {featuredApps.length > 0 && (
+    <section class="apps-section" aria-label="Featured apps">
+      <div class="section-header">
+        <h2 class="section-title">Featured</h2>
+        <a href="/categories" class="section-more">See all →</a>
+      </div>
+      <div class="apps-scroll" role="list">
+        {featuredApps.map(app => (
+          <a
+            href={`/app/${app.id}`}
+            class="app-card app-card--featured"
+            role="listitem"
+            aria-label={app.app_name}
+          >
+            <div class="app-card-icon">
+              {app.icon_r2_key
+                ? <img src={`/media/${app.icon_r2_key}`} alt={`${app.app_name} icon`} width="64" height="64" />
+                : <div class="app-icon-placeholder">{app.app_name.charAt(0)}</div>
+              }
+              {app.is_evosystem === 1 && <span class="badge-evosystem" aria-label="VTL Evosystem app">✦</span>}
+            </div>
+            <div class="app-card-info">
+              <div class="app-card-name">{app.short_name ?? app.app_name}</div>
+              <div class="app-card-category">{app.category}</div>
+              {app.short_description && (
+                <div class="app-card-desc">{app.short_description}</div>
+              )}
+            </div>
+          </a>
+        ))}
+      </div>
+    </section>
+  )}
+
+  <!-- ── ALL APPS ── -->
+  {allApps.length > 0 && (
+    <section class="apps-section" aria-label="All apps" id="allApps">
+      <div class="section-header">
+        <h2 class="section-title">All Apps</h2>
+        <span class="section-count">{catalog.count}</span>
+      </div>
+      <div class="apps-grid" role="list" id="appsGrid">
+        {allApps.map(app => (
+          <a
+            href={`/app/${app.id}`}
+            class="app-card"
+            role="listitem"
+            aria-label={app.app_name}
+            data-category={app.category}
+            data-name={app.app_name.toLowerCase()}
+          >
+            <div class="app-card-icon">
+              {app.icon_r2_key
+                ? <img src={`/media/${app.icon_r2_key}`} alt={`${app.app_name} icon`} width="56" height="56" />
+                : <div class="app-icon-placeholder app-icon-placeholder--sm">{app.app_name.charAt(0)}</div>
+              }
+              {app.is_evosystem === 1 && <span class="badge-evosystem badge-evosystem--sm" aria-label="VTL Evosystem app">✦</span>}
+            </div>
+            <div class="app-card-info">
+              <div class="app-card-name">{app.short_name ?? app.app_name}</div>
+              <div class="app-card-category">{app.category}</div>
+            </div>
+          </a>
+        ))}
+      </div>
+    </section>
+  )}
+
+  <!-- ── DEVELOPER SANDBOX CTA ── -->
+  <section class="sandbox-section" aria-label="Developer tools">
+    <div class="sandbox-inner">
+      <div class="sandbox-header">
+        <div class="sandbox-badge">Developer Tools</div>
+        <h2 class="sandbox-title">Build on the Evosystem</h2>
+        <p class="sandbox-sub">Submit your Instant Application and reach millions of users through AppWow's verified marketplace.</p>
+      </div>
+      <div class="sandbox-grid">
+        <a href="/developer#submit" class="sandbox-card">
+          <span class="sandbox-card-icon">📋</span>
+          <div class="sandbox-card-title">Submit App</div>
+          <div class="sandbox-card-desc">Start the verified listing process</div>
+        </a>
+        <a href="/developer#docs" class="sandbox-card">
+          <span class="sandbox-card-icon">📄</span>
+          <div class="sandbox-card-title">Documentation</div>
+          <div class="sandbox-card-desc">Manifest spec and technical guides</div>
+        </a>
+        <a href="/developer#requirements" class="sandbox-card">
+          <span class="sandbox-card-icon">✅</span>
+          <div class="sandbox-card-title">Requirements</div>
+          <div class="sandbox-card-desc">What your app needs to pass verification</div>
+        </a>
+        <a href="/developer#api" class="sandbox-card">
+          <span class="sandbox-card-icon">⚡</span>
+          <div class="sandbox-card-title">API Access</div>
+          <div class="sandbox-card-desc">Evosystem data feeds and integration</div>
+        </a>
+      </div>
+      <a href="/developer" class="sandbox-cta">Open Developer Hub →</a>
+    </div>
+  </section>
+
+</BaseLayout>
+
+<style>
+  /* ── UTILITY BAR ── */
+  .utility-bar {
+    background: var(--evo-dark);
+    border-bottom: 1px solid rgba(255,255,255,.06);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .utility-bar::-webkit-scrollbar { display: none; }
+  .utility-inner {
+    display: flex;
+    gap: .25rem;
+    padding: .5rem 1.25rem;
+    min-width: max-content;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  .utility-item {
+    display: flex; flex-direction: column; align-items: center;
+    gap: .2rem;
+    padding: .5rem .875rem;
+    border-radius: 10px;
+    color: rgba(255,255,255,.65);
+    text-decoration: none;
+    font-size: .68rem; font-weight: 600;
+    letter-spacing: .03em; text-transform: uppercase;
+    transition: var(--transition);
+    white-space: nowrap;
+  }
+  .utility-item:hover {
+    background: rgba(255,255,255,.08);
+    color: white;
+  }
+  .utility-item--highlight {
+    color: var(--vtl-cyan);
+  }
+  .utility-item--highlight:hover {
+    background: rgba(0,200,232,.1);
+    color: var(--vtl-cyan);
+  }
+  .utility-icon { font-size: 1.1rem; }
+
+  /* ── HERO ── */
+  .hero {
+    background: linear-gradient(160deg, var(--evo-black) 0%, #0D1B2A 60%, #0a2a1a 100%);
+    padding: 3.5rem 1.5rem 4rem;
+    min-height: 420px;
+    display: flex; align-items: center;
+  }
+  .hero-inner { max-width: 640px; }
+  .hero-badge {
+    display: inline-block;
+    padding: .35rem .875rem;
+    background: rgba(0,200,232,.12);
+    border: 1px solid rgba(0,200,232,.3);
+    border-radius: 99px;
+    color: var(--vtl-cyan);
+    font-size: .72rem; font-weight: 700;
+    letter-spacing: .08em; text-transform: uppercase;
+    margin-bottom: 1.25rem;
+  }
+  .hero-title {
+    font-family: var(--font-display);
+    font-size: clamp(2.4rem, 6vw, 4rem);
+    font-weight: 800; line-height: 1.08;
+    color: white; margin-bottom: 1.25rem;
+  }
+  .hero-title-accent {
+    background: linear-gradient(90deg, var(--vtl-blue), var(--vtl-cyan));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero-sub {
+    font-size: 1.05rem; color: rgba(255,255,255,.65);
+    line-height: 1.6; margin-bottom: 2rem; max-width: 480px;
+  }
+  .hero-actions { display: flex; gap: .875rem; flex-wrap: wrap; }
+  .btn-primary {
+    display: inline-flex; align-items: center;
+    padding: .8rem 1.75rem;
+    background: var(--vtl-blue); color: white;
+    text-decoration: none; border-radius: 12px;
+    font-weight: 700; font-size: .9rem;
+    transition: var(--transition);
+    box-shadow: 0 4px 16px rgba(0,87,184,.35);
+  }
+  .btn-primary:hover { background: #0068d9; transform: translateY(-1px); }
+  .btn-ghost {
+    display: inline-flex; align-items: center;
+    padding: .8rem 1.75rem;
+    border: 1.5px solid rgba(255,255,255,.2); color: rgba(255,255,255,.8);
+    text-decoration: none; border-radius: 12px;
+    font-weight: 600; font-size: .9rem;
+    transition: var(--transition);
+  }
+  .btn-ghost:hover { border-color: white; color: white; }
+
+  /* ── SEARCH ── */
+  .search-section {
+    display: none;
+    background: white;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #E5E7EB;
+    box-shadow: 0 4px 12px rgba(0,0,0,.06);
+  }
+  .search-section.open { display: block; }
+  .search-inner {
+    max-width: 680px; margin: 0 auto;
+    position: relative;
+  }
+  .search-input {
+    width: 100%; padding: .875rem 3rem .875rem 1.25rem;
+    border: 2px solid #E5E7EB; border-radius: 12px;
+    font-size: 1rem; font-family: var(--font-body);
+    outline: none; transition: var(--transition);
+  }
+  .search-input:focus { border-color: var(--vtl-blue); }
+  .search-clear {
+    position: absolute; right: .875rem; top: 50%; transform: translateY(-50%);
+    background: none; border: none; cursor: pointer;
+    color: var(--mid-grey); font-size: 1rem;
+    display: none;
+  }
+  .search-clear.visible { display: block; }
+
+  /* ── EMPTY STATE ── */
+  .empty-state { padding: 5rem 1.5rem; text-align: center; }
+  .empty-inner { max-width: 400px; margin: 0 auto; }
+  .empty-icon { font-size: 3.5rem; margin-bottom: 1.5rem; }
+  .empty-state h2 {
+    font-family: var(--font-display);
+    font-size: 1.6rem; font-weight: 700; margin-bottom: .75rem;
+  }
+  .empty-state p { color: var(--tech-grey); margin-bottom: 2rem; line-height: 1.6; }
+
+  /* ── SECTIONS ── */
+  .apps-section { padding: 2rem 1.5rem; }
+  .section-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 1.25rem;
+    max-width: 1400px; margin-left: auto; margin-right: auto;
+    margin-bottom: 1.25rem;
+  }
+  .section-title {
+    font-family: var(--font-display);
+    font-size: 1.3rem; font-weight: 700; color: var(--evo-black);
+  }
+  .section-more {
+    font-size: .85rem; font-weight: 600; color: var(--vtl-blue);
+    text-decoration: none;
+  }
+  .section-more:hover { text-decoration: underline; }
+  .section-count {
+    background: var(--light-grey); color: var(--tech-grey);
+    font-size: .75rem; font-weight: 700;
+    padding: .2rem .625rem; border-radius: 99px;
+  }
+
+  /* ── FEATURED SCROLL ── */
+  .apps-scroll {
+    display: flex; gap: 1rem;
+    overflow-x: auto; padding-bottom: .5rem;
+    scrollbar-width: none;
+    max-width: 1400px; margin: 0 auto;
+  }
+  .apps-scroll::-webkit-scrollbar { display: none; }
+
+  /* ── APP GRID ── */
+  .apps-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 1rem;
+    max-width: 1400px; margin: 0 auto;
+  }
+
+  /* ── APP CARD ── */
+  .app-card {
+    display: flex; flex-direction: column;
+    background: white;
+    border: 1.5px solid #E5E7EB;
+    border-radius: var(--radius);
+    padding: 1.25rem 1rem;
+    text-decoration: none; color: inherit;
+    transition: var(--transition);
+    box-shadow: var(--shadow);
+    cursor: pointer;
+    position: relative;
+  }
+  .app-card:hover {
+    border-color: var(--vtl-blue);
+    box-shadow: var(--hover-shadow);
+    transform: translateY(-2px);
+  }
+  .app-card--featured { min-width: 200px; }
+
+  .app-card-icon {
+    position: relative; margin-bottom: .875rem;
+    width: 64px; height: 64px;
+  }
+  .app-card-icon img {
+    width: 64px; height: 64px;
+    border-radius: var(--radius-icon);
+    object-fit: cover;
+  }
+  .app-icon-placeholder {
+    width: 64px; height: 64px;
+    background: linear-gradient(135deg, var(--vtl-blue), var(--vtl-cyan));
+    border-radius: var(--radius-icon);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-display);
+    font-size: 1.6rem; font-weight: 800; color: white;
+  }
+  .app-icon-placeholder--sm { width: 56px; height: 56px; font-size: 1.4rem; }
+
+  .badge-evosystem {
+    position: absolute; bottom: -4px; right: -4px;
+    width: 20px; height: 20px;
+    background: linear-gradient(135deg, var(--vtl-blue), var(--vtl-cyan));
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .6rem; color: white;
+    border: 2px solid white;
+  }
+  .badge-evosystem--sm { width: 18px; height: 18px; font-size: .55rem; }
+
+  .app-card-name {
+    font-family: var(--font-display);
+    font-size: .9rem; font-weight: 700; color: var(--evo-black);
+    margin-bottom: .2rem;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .app-card-category {
+    font-size: .72rem; color: var(--mid-grey);
+    font-weight: 600; text-transform: uppercase; letter-spacing: .04em;
+  }
+  .app-card-desc {
+    font-size: .78rem; color: var(--tech-grey);
+    margin-top: .5rem; line-height: 1.4;
+    display: -webkit-box; -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical; overflow: hidden;
+  }
+
+  /* ── SANDBOX ── */
+  .sandbox-section {
+    background: var(--evo-dark);
+    padding: 3rem 1.5rem;
+    margin-top: 1rem;
+  }
+  .sandbox-inner { max-width: 1400px; margin: 0 auto; }
+  .sandbox-badge {
+    display: inline-block;
+    padding: .3rem .75rem;
+    background: rgba(0,200,232,.12);
+    border: 1px solid rgba(0,200,232,.25);
+    border-radius: 99px;
+    color: var(--vtl-cyan);
+    font-size: .68rem; font-weight: 700;
+    letter-spacing: .08em; text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+  .sandbox-title {
+    font-family: var(--font-display);
+    font-size: 1.75rem; font-weight: 800;
+    color: white; margin-bottom: .75rem;
+  }
+  .sandbox-sub {
+    color: rgba(255,255,255,.55);
+    font-size: .9rem; line-height: 1.6;
+    max-width: 520px; margin-bottom: 2rem;
+  }
+  .sandbox-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem; margin-bottom: 2rem;
+  }
+  .sandbox-card {
+    background: rgba(255,255,255,.05);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    text-decoration: none; color: inherit;
+    transition: var(--transition);
+  }
+  .sandbox-card:hover {
+    background: rgba(255,255,255,.09);
+    border-color: rgba(0,200,232,.3);
+  }
+  .sandbox-card-icon { font-size: 1.5rem; margin-bottom: .75rem; display: block; }
+  .sandbox-card-title {
+    font-family: var(--font-display);
+    font-size: .95rem; font-weight: 700; color: white;
+    margin-bottom: .3rem;
+  }
+  .sandbox-card-desc { font-size: .78rem; color: rgba(255,255,255,.45); line-height: 1.4; }
+  .sandbox-cta {
+    display: inline-flex; align-items: center;
+    padding: .75rem 1.5rem;
+    border: 1.5px solid rgba(255,255,255,.2);
+    color: rgba(255,255,255,.8);
+    text-decoration: none; border-radius: 12px;
+    font-weight: 600; font-size: .9rem;
+    transition: var(--transition);
+  }
+  .sandbox-cta:hover { border-color: var(--vtl-cyan); color: var(--vtl-cyan); }
+</style>
+
+<script>
+  // ── SEARCH TOGGLE ──
+  // Listens for the event dispatched by BaseLayout footer Search button
+  const searchSection = document.getElementById('searchSection');
+  const searchInput   = document.getElementById('searchInput') as HTMLInputElement;
+  const searchClear   = document.getElementById('searchClear');
+  const appsGrid      = document.getElementById('appsGrid');
+
+  window.addEventListener('appwow:search-toggle', () => {
+    const isOpen = searchSection?.classList.contains('open');
+    if (isOpen) {
+      searchSection?.classList.remove('open');
+      if (searchInput) searchInput.value = '';
+      searchClear?.classList.remove('visible');
+      showAllCards();
+    } else {
+      searchSection?.classList.add('open');
+      searchInput?.focus();
+    }
+  });
+
+  // ── SEARCH FILTER ──
+  searchInput?.addEventListener('input', () => {
+    const val = searchInput.value.toLowerCase().trim();
+    searchClear?.classList.toggle('visible', val.length > 0);
+    filterCards(val);
+  });
+
+  searchClear?.addEventListener('click', () => {
+    if (searchInput) searchInput.value = '';
+    searchClear.classList.remove('visible');
+    showAllCards();
+    searchInput?.focus();
+  });
+
+  function filterCards(query: string) {
+    const cards = appsGrid?.querySelectorAll<HTMLElement>('.app-card');
+    cards?.forEach(card => {
+      const name     = card.dataset.name     ?? '';
+      const category = card.dataset.category ?? '';
+      const match    = name.includes(query) || category.includes(query);
+      card.style.display = match ? '' : 'none';
+    });
+  }
+
+  function showAllCards() {
+    const cards = appsGrid?.querySelectorAll<HTMLElement>('.app-card');
+    cards?.forEach(card => { card.style.display = ''; });
+  }
+</script>
