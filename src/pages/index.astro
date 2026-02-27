@@ -357,6 +357,31 @@ const isEmpty      = catalog.count === 0;
 .utility-iconItem--soon:hover {
   background: rgba(255,255,255,.04);
 }
+ /* ── MOBILE PORTRAIT FIX ── */
+  @media (max-width: 640px) {
+
+    .utility-inner--icons {
+      display: flex;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      gap: .75rem;
+      padding-bottom: .25rem;
+    }
+
+    .utility-iconItem {
+      flex: 0 0 auto;
+      min-width: 72px;
+    }
+
+    .utility-label {
+      font-size: .7rem;
+    }
+
+    .utility-inner--icons::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
 
 /* ── CTA BOXES ── */
 
