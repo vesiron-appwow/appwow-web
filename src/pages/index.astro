@@ -48,43 +48,60 @@ const isEmpty      = catalog.count === 0;
   me={me}
 >
 
- <!-- ── UTILITY TOOLBAR ── -->
-<section class="utility-bar" aria-label="VTL Evosystem products">
-  <div class="utility-inner">
+  <!-- ── UTILITY TOOLBARS ── -->
+  <section class="utility-bars" aria-label="VTL Evosystem products">
 
-    <a href="https://linxlocal.pages.dev" data-product="linxlocal" class="utility-item">
-      <span class="utility-icon">📍</span>
-      <span>LinxLocal</span>
-    </a>
+    <!-- TOP: ICON GRID (Discovery Engines) -->
+    <div class="utility-bar utility-bar--icons">
+      <div class="utility-inner utility-inner--icons">
 
-    <a href="https://carlinx-ia.pages.dev" data-product="carlinx" class="utility-item">
-      <span class="utility-icon">🚗</span>
-      <span>CarLinx</span>
-    </a>
+        <a href="https://linxlocal.pages.dev" data-product="linxlocal" class="utility-iconItem">
+          <span class="utility-iconBox" aria-hidden="true">L</span>
+          <span class="utility-label">LinxLocal</span>
+        </a>
 
-    <a href="https://linxmart-ia.pages.dev" data-product="linxmart" class="utility-item">
-      <span class="utility-icon">🛒</span>
-      <span>LinxMart</span>
-    </a>
+        <a href="https://carlinx-ia.pages.dev" data-product="carlinx" class="utility-iconItem">
+          <span class="utility-iconBox" aria-hidden="true">C</span>
+          <span class="utility-label">CarLinx</span>
+        </a>
 
-    <a href="https://homelinx-ia.pages.dev" data-product="homelinx" class="utility-item">
-      <span class="utility-icon">🏠</span>
-      <span>HomeLinx</span>
-    </a>
+        <a href="https://homelinx-ia.pages.dev" data-product="homelinx" class="utility-iconItem">
+          <span class="utility-iconBox" aria-hidden="true">H</span>
+          <span class="utility-label">HomeLinx</span>
+        </a>
 
-<a href="https://arcadia-ia.pages.dev" data-product="arcadia" class="utility-item">
-  <span class="utility-icon">⛰️</span>
-  <span>Arcadia</span>
-</a>
+        <!-- SportingLinx (coming soon) -->
+        <a href="/soon" data-product="sportinglinx" class="utility-iconItem utility-iconItem--soon" aria-label="SportingLinx (coming soon)">
+          <span class="utility-iconBox" aria-hidden="true">S</span>
+          <span class="utility-label">SportingLinx</span>
+        </a>
 
+        <a href="https://arcadia-ia.pages.dev" data-product="arcadia" class="utility-iconItem">
+          <span class="utility-iconBox" aria-hidden="true">A</span>
+          <span class="utility-label">Arcadia</span>
+        </a>
 
-    <a href="/account" data-product="mylynx" class="utility-item utility-item--highlight">
-      <span class="utility-icon">⚡</span>
-      <span>myLynx</span>
-    </a>
+      </div>
+    </div>
 
-  </div>
-</section>
+    <!-- LOWER: CTA BOXES (Platforms / Wallet) -->
+    <div class="utility-bar utility-bar--ctas">
+      <div class="utility-inner utility-inner--ctas">
+
+        <a href="https://linxmart-ia.pages.dev" data-product="linxmart" class="utility-cta">
+          <div class="utility-ctaTitle">LinxMart</div>
+          <div class="utility-ctaSub">Find-it here</div>
+        </a>
+
+        <a href="/account" data-product="mylynx" class="utility-cta utility-cta--highlight">
+          <div class="utility-ctaTitle">myLynx</div>
+          <div class="utility-ctaSub">Available here</div>
+        </a>
+
+      </div>
+    </div>
+
+  </section>
 
   <!-- ── HERO ── -->
   <section class="hero">
@@ -239,46 +256,161 @@ const isEmpty      = catalog.count === 0;
 </BaseLayout>
 
 <style>
-  /* ── UTILITY BAR ── */
-  .utility-bar {
-    background: var(--evo-dark);
-    border-bottom: 1px solid rgba(255,255,255,.06);
-    overflow-x: auto;
-    scrollbar-width: none;
+  /* ── UTILITY BARS (TOP ICONS + LOWER CTAs) ── */
+.utility-bars {
+  background: var(--evo-dark);
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+
+/* Shared bar container */
+.utility-bar {
+  background: var(--evo-dark);
+}
+
+/* TOP: icon grid bar */
+.utility-bar--icons {
+  padding: .75rem 1.25rem .4rem;
+}
+
+/* LOWER: CTA bar */
+.utility-bar--ctas {
+  padding: .4rem 1.25rem 1rem;
+  border-top: 1px solid rgba(255,255,255,.06);
+}
+
+/* Shared inner */
+.utility-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* ICON ROW */
+.utility-inner--icons {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: .85rem;
+}
+
+/* CTA ROW */
+.utility-inner--ctas {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .85rem;
+}
+
+/* ── ICON ITEMS ── */
+
+.utility-iconItem {
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .45rem;
+  padding: .4rem .25rem;
+  border-radius: 16px;
+  transition: var(--transition);
+  color: rgba(255,255,255,.85);
+}
+
+.utility-iconItem:hover {
+  background: rgba(255,255,255,.06);
+}
+
+/* Gradient letter — matches "Instantly" */
+.utility-iconBox {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.10);
+
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.15rem;
+  letter-spacing: .02em;
+
+  background-image: linear-gradient(90deg, var(--vtl-blue), var(--vtl-cyan));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.utility-label {
+  font-size: .75rem;
+  font-weight: 700;
+  letter-spacing: .02em;
+  color: rgba(255,255,255,.75);
+  line-height: 1.1;
+}
+
+/* Coming soon styling */
+.utility-iconItem--soon {
+  opacity: .7;
+}
+.utility-iconItem--soon .utility-iconBox {
+  border-style: dashed;
+}
+.utility-iconItem--soon:hover {
+  background: rgba(255,255,255,.04);
+}
+
+/* ── CTA BOXES ── */
+
+/* LinxMart — Primary */
+.utility-cta {
+  text-decoration: none;
+  border-radius: 18px;
+  padding: 1rem 1.1rem;
+
+  display: flex;
+  flex-direction: column;
+  gap: .2rem;
+
+  transition: var(--transition);
+  color: white;
+
+  background: var(--vtl-blue);
+  box-shadow: 0 4px 18px rgba(0,87,184,.35);
+}
+
+.utility-cta:hover {
+  background: #0068d9;
+  transform: translateY(-2px);
+}
+
+/* myLynx — Accent gradient */
+.utility-cta--highlight {
+  background: linear-gradient(135deg, var(--vtl-blue), var(--vtl-cyan));
+  box-shadow: 0 4px 18px rgba(0,200,232,.35);
+}
+
+.utility-cta--highlight:hover {
+  transform: translateY(-2px);
+}
+
+.utility-ctaTitle {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.1rem;
+  letter-spacing: -.01em;
+}
+
+.utility-ctaSub {
+  font-size: .85rem;
+  font-weight: 600;
+  opacity: .9;
+}
+
+/* Mobile wrap */
+@media (max-width: 520px) {
+  .utility-inner--icons {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
-  .utility-bar::-webkit-scrollbar { display: none; }
-  .utility-inner {
-    display: flex;
-    gap: .25rem;
-    padding: .5rem 1.25rem;
-    min-width: max-content;
-    max-width: 1400px;
-    margin: 0 auto;
-  }
-  .utility-item {
-    display: flex; flex-direction: column; align-items: center;
-    gap: .2rem;
-    padding: .5rem .875rem;
-    border-radius: 10px;
-    color: rgba(255,255,255,.65);
-    text-decoration: none;
-    font-size: .68rem; font-weight: 600;
-    letter-spacing: .03em; text-transform: uppercase;
-    transition: var(--transition);
-    white-space: nowrap;
-  }
-  .utility-item:hover {
-    background: rgba(255,255,255,.08);
-    color: white;
-  }
-  .utility-item--highlight {
-    color: var(--vtl-cyan);
-  }
-  .utility-item--highlight:hover {
-    background: rgba(0,200,232,.1);
-    color: var(--vtl-cyan);
-  }
-  .utility-icon { font-size: 1.1rem; }
+}
 
   /* ── HERO ── */
   .hero {
